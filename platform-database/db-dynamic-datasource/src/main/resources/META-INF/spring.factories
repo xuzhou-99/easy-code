@@ -1,0 +1,2 @@
+org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
+  com.qingyan.easycode.platform.db.starter.EasyCodeDataBaseAutoConfiguration

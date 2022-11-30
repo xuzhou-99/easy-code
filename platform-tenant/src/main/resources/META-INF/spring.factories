@@ -1,0 +1,2 @@
+org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
+  com.qingyan.easycode.platform.tenant.starter.EasyCodeTenantAutoConfiguration,com.qingyan.easycode.platform.tenant.redis.RedisConfig
