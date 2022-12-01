@@ -3,12 +3,12 @@ package com.qingyan.easycode.platform.core.exception;
 import com.qingyan.easycode.platform.core.exception.enums.BaseExceptionEnum;
 
 /**
- * 业务异常
+ * 封装定义异常
  *
  * @author xuzhou
- * @since 2022/12/1
+ * @since 2022/11/30
  */
-public class BizException extends RuntimeException {
+public class BaseException extends Exception {
 
     /**
      * 异常信息
@@ -18,22 +18,22 @@ public class BizException extends RuntimeException {
     /**
      * 无参构造方法默认为程序错误
      */
-    public BizException() {
+    public BaseException() {
         super(BaseExceptionEnum.ERROR.message());
         this.errorInfo = BaseExceptionEnum.ERROR;
     }
 
-    public BizException(String message) {
+    public BaseException(String message) {
         super(message);
         this.errorInfo = BaseExceptionEnum.ERROR;
     }
 
-    public BizException(ErrorInfo errorInfo) {
+    public BaseException(ErrorInfo errorInfo) {
         super(errorInfo.message());
         this.errorInfo = errorInfo;
     }
 
-    public BizException(ErrorInfo errorInfo, String message) {
+    public BaseException(ErrorInfo errorInfo, String message) {
         super(message);
         this.errorInfo = errorInfo;
     }
@@ -46,7 +46,7 @@ public class BizException extends RuntimeException {
      * @return int
      */
     public static int getCode(Exception e) {
-        return e instanceof BizException ? ((BizException) e).getErrorInfo().code() : BaseExceptionEnum.ERROR.code();
+        return e instanceof BaseException ? ((BaseException) e).getErrorInfo().code() : BaseExceptionEnum.ERROR.code();
     }
 
     /**
@@ -57,4 +57,6 @@ public class BizException extends RuntimeException {
     public ErrorInfo getErrorInfo() {
         return errorInfo;
     }
+
+
 }

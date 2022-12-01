@@ -1,25 +1,12 @@
-package com.qingyan.easycode.platform.tenant.enums;
+package com.qingyan.easycode.platform.db.exception;
+
+import com.qingyan.easycode.platform.core.exception.ErrorInfo;
 
 /**
  * @author xuzhou
- * @since 2022/11/28
+ * @since 2022/11/30
  */
-public enum HandleExceptionEnum {
-    /**
-     * 待处理
-     */
-    WAIT(0, "待处理"),
-
-    /**
-     * 成功
-     */
-    SUCCESS(10, "SUCCESS"),
-
-    /**
-     * 程序错误
-     */
-    ERROR(100, "程序错误"),
-
+public enum HandleExceptionEnum implements ErrorInfo {
 
     /**
      * 公共 - rds配置未取到
@@ -96,13 +83,14 @@ public enum HandleExceptionEnum {
         return false;
     }
 
+    @Override
     public int code() {
         return code;
     }
 
+    @Override
     public String message() {
         return message;
     }
-
 
 }

@@ -1,10 +1,12 @@
-package com.qingyan.easycode.platform.core.exception;
+package com.qingyan.easycode.platform.core.exception.enums;
+
+import com.qingyan.easycode.platform.core.exception.ErrorInfo;
 
 /**
  * @author xuzhou
- * @since 2022/11/30
+ * @since 2022/12/1
  */
-public enum HandleExceptionEnum implements ErrorInfo {
+public enum BaseExceptionEnum implements ErrorInfo {
 
     /**
      * 待处理
@@ -21,33 +23,6 @@ public enum HandleExceptionEnum implements ErrorInfo {
      */
     ERROR(0, "程序错误"),
 
-
-    /**
-     * 公共 - rds配置未取到
-     */
-    C_GENERATE_RDS_NOT_FOUND(1001, "rds配置未取到"),
-
-    /**
-     * 公共 - 租户代码为空
-     */
-    C_GENERATE_TENANT_CODE_IS_BLANK(1002, "租户代码为空"),
-
-    /**
-     * 公共 - 数据源配置不存在
-     */
-    C_GENERATE_DATA_SOURCE_NOT_EXIST(1003, "数据源配置不存在"),
-
-    /**
-     * 公共 - 数据源名称为空
-     */
-    C_GENERATE_DATA_SOURCE_NAME_IS_EMPTY(1004, "数据源名称为空"),
-
-    /**
-     * 公共 - 数据源名称为空
-     */
-    C_GENERATE_DATA_SOURCE_SWITCH_FAIL(1005, "数据源切换失败"),
-
-
     // ------------------------------------------------------------------
 
     ;
@@ -62,7 +37,7 @@ public enum HandleExceptionEnum implements ErrorInfo {
      */
     private final String message;
 
-    HandleExceptionEnum(int code, String message) {
+    BaseExceptionEnum(int code, String message) {
         this.code = code;
         this.message = message;
     }
@@ -73,8 +48,8 @@ public enum HandleExceptionEnum implements ErrorInfo {
      * @param code 错误码
      * @return HandleExceptionEnum
      */
-    public static HandleExceptionEnum codeOf(int code) {
-        for (HandleExceptionEnum item : HandleExceptionEnum.values()) {
+    public static BaseExceptionEnum codeOf(int code) {
+        for (BaseExceptionEnum item : BaseExceptionEnum.values()) {
             if (item.code() == code) {
                 return item;
             }
@@ -89,7 +64,7 @@ public enum HandleExceptionEnum implements ErrorInfo {
      * @return boolean
      */
     public static boolean contain(int code) {
-        for (HandleExceptionEnum item : HandleExceptionEnum.values()) {
+        for (BaseExceptionEnum item : BaseExceptionEnum.values()) {
             if (item.code() == code) {
                 return true;
             }
@@ -106,5 +81,4 @@ public enum HandleExceptionEnum implements ErrorInfo {
     public String message() {
         return message;
     }
-
 }
