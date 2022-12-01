@@ -31,8 +31,8 @@ import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.core.Ordered;
 import org.springframework.stereotype.Component;
 
-import com.qingyan.easycode.platform.db.tenant.MasterTenantHandler;
 import com.qingyan.easycode.platform.db.RegisterTenantDatasource;
+import com.qingyan.easycode.platform.db.tenant.MasterTenantHandler;
 
 import lombok.extern.slf4j.Slf4j;
 

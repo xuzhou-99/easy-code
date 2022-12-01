@@ -23,7 +23,7 @@ public enum DynamicDataSourceStatusEnum {
     /**
      * 租户已停用
      */
-    DATASOURCE_TENANT_STOPED(102),
+    DATASOURCE_TENANT_DEACTIVATED(102),
     /**
      * 服务异常
      */

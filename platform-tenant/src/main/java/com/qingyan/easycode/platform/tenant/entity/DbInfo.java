@@ -51,15 +51,15 @@ public class DbInfo implements Serializable {
     /**
      * 最大连接数.
      */
-    private Integer maxConnCount;
+    private Integer maxConnCount = 100;
     /**
      * 最小连接数.
      */
-    private Integer minConnCount;
+    private Integer minConnCount = 1;
     /**
      * 空闲回收时间.
      */
-    private Integer maxConnLifetime;
+    private Integer maxConnLifetime = 3600;
 
     private String dbHost;
 

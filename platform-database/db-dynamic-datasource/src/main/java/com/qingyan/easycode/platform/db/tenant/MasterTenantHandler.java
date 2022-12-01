@@ -2,10 +2,14 @@ package com.qingyan.easycode.platform.db.tenant;
 
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.qingyan.easycode.platform.db.DatabaseRouter;
 import com.qingyan.easycode.platform.db.constans.DataSourceTypeEnum;
 import com.qingyan.easycode.platform.tenant.TenantHandler;
 import com.qingyan.easycode.platform.tenant.entity.TenantInfo;
+import com.qingyan.easycode.platform.tenant.exception.TenantException;
 
 /**
  * 主数据源租户处理
@@ -14,6 +18,8 @@ import com.qingyan.easycode.platform.tenant.entity.TenantInfo;
  * @since 2022/11/30
  */
 public class MasterTenantHandler {
+
+    private static final Logger log = LoggerFactory.getLogger(MasterTenantHandler.class);
 
     private MasterTenantHandler() {
 
@@ -35,13 +41,43 @@ public class MasterTenantHandler {
      * @return 企业信息
      */
     public static TenantInfo getTenantInfo(Long tenantId) {
-        DatabaseRouter.setDataSourceType(DataSourceTypeEnum.MASTER);
 
-        TenantInfo tenantInfo = TenantHandler.getTenantInfo(tenantId);
+        log.info("====== 切换到 Master 数据源获取企业租户信息 ======");
+        DatabaseRouter.setDataSourceType(DataSourceTypeEnum.POOL_MASTER_FORCE);
 
-        DatabaseRouter.removeOne();
+        try {
+            return TenantHandler.getTenantInfo(tenantId);
+        } catch (TenantException e) {
+            log.error("从 Master 数据源获取企业租户信息失败：{}", e.getMessage());
+            throw new TenantException(e.getMessage());
+        } finally {
+            DatabaseRouter.removeOne();
+            log.info("====== 移除 Master 数据源 ======");
+        }
+    }
 
-        return tenantInfo;
+
+    /**
+     * 根据企业编码查询企业信息列表
+     *
+     * @param tenantCode 企业编码
+     * @return 企业信息列表
+     */
+    public static TenantInfo doGetTenantByCode(String tenantCode) {
+
+        log.info("====== 切换到 Master 数据源获取企业租户信息 ======");
+        DatabaseRouter.setDataSourceType(DataSourceTypeEnum.POOL_MASTER_FORCE);
+
+        try {
+            return TenantHandler.doGetTenantByCode(tenantCode);
+        } catch (TenantException e) {
+            log.error("从 Master 数据源获取企业租户信息失败：{}", e.getMessage());
+            throw new TenantException(e.getMessage());
+        } finally {
+            DatabaseRouter.removeOne();
+            log.info("====== 移除 Master 数据源 ======");
+        }
+
     }
 
     /**
@@ -51,12 +87,16 @@ public class MasterTenantHandler {
      */
     public static List<String> getAllTenantIds() {
 
-        DatabaseRouter.setDataSourceType(DataSourceTypeEnum.MASTER);
-
-        List<String> allTenantIds = TenantHandler.getAllTenantIds();
-
-        DatabaseRouter.removeOne();
-
-        return allTenantIds;
+        try {
+            log.info("====== 切换到 Master 数据源获取企业租户信息 ======");
+            DatabaseRouter.setDataSourceType(DataSourceTypeEnum.POOL_MASTER_FORCE);
+            return TenantHandler.getAllTenantIds();
+        } catch (TenantException e) {
+            log.error("从 Master 数据源获取企业租户信息失败：{}", e.getMessage());
+            throw new TenantException(e.getMessage());
+        } finally {
+            DatabaseRouter.removeOne();
+            log.info("====== 移除 Master 数据源 ======");
+        }
     }
 }

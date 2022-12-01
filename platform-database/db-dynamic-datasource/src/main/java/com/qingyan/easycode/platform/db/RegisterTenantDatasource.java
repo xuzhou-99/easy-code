@@ -36,7 +36,7 @@ public class RegisterTenantDatasource {
 
     public static final String connectionTestBefore = "0";
     public static final int connectionSleepKeepTime = Integer.parseInt("2000");
-    private static final Logger LOGGER = LoggerFactory.getLogger(RegisterTenantDatasource.class);
+    private static final Logger logger = LoggerFactory.getLogger(RegisterTenantDatasource.class);
     /**
      * hash 锁
      */
@@ -59,7 +59,7 @@ public class RegisterTenantDatasource {
             TenantInfo tenantInfo = MasterTenantHandler.getTenantInfo(tenantId);
             return getTenantDatasource(tenantInfo);
         } catch (Exception e) {
-            LOGGER.error("根据企业ID[{}]获取数据源失败，原因：{}", tenantId, e.getMessage(), e);
+            logger.error("根据企业ID[{}]获取数据源失败，原因：{}", tenantId, e.getMessage(), e);
             return false;
         }
 
@@ -81,7 +81,7 @@ public class RegisterTenantDatasource {
 
             setCurrentTenantId(tenantId);
 
-            LOGGER.info("[{}] dataSource exists status :{}", tenantId, DynamicDataSource.isDataSourceExist(tenantId));
+            logger.info("[{}] dataSource exists status :{}", tenantId, DynamicDataSource.isDataSourceExist(tenantId));
 
             // 如果数据源未初始化，那么执行初始化
             if (!DynamicDataSource.isDataSourceExist(tenantId)) {
@@ -90,7 +90,7 @@ public class RegisterTenantDatasource {
 
             return true;
         } catch (Exception e) {
-            LOGGER.error("根据企业ID[{}]获取数据源失败，原因：{}", tenantId, e.getMessage(), e);
+            logger.error("根据企业ID[{}]获取数据源失败，原因：{}", tenantId, e.getMessage(), e);
             return false;
         }
     }
@@ -102,32 +102,32 @@ public class RegisterTenantDatasource {
      */
     private static void setCurrentTenantId(Long tenantId) {
         // 设置当前企业数据源标志到session中
-
         RequestAttributes requestAttributes = RequestContextHolder.getRequestAttributes();
         if (null != requestAttributes) {
             // 获取 HttpServletRequest
             HttpServletRequest request = (HttpServletRequest) requestAttributes.resolveReference(RequestAttributes.REFERENCE_REQUEST);
 
             if (request == null) {
-                LOGGER.info("request is null, 设置企业信息到线程环境中");
+                logger.info("request is null, 设置企业信息到线程环境中");
                 DynamicDataSource.setCurTenant(tenantId);
                 return;
             }
 
             HttpSession session = request.getSession(false);
 
-            // 请求过来的话，那么都设置 ThreadLocal
-            DynamicDataSource.setCurTenant(tenantId);
-
             if (session != null) {
                 Long oldTenantId = (Long) session.getAttribute(TenantConstants.TENANT_ID);
-                LOGGER.debug("注册数据库连接时重新设置当前用户企业ID：{}，OLD：{}", tenantId, oldTenantId);
+                logger.debug("注册数据库连接时重新设置当前用户企业ID：{}，OLD：{}", tenantId, oldTenantId);
 
-                if (null != oldTenantId && !tenantId.equals(oldTenantId)) {
-                    LOGGER.info("检查到企业ID存在差异，{} => {}", oldTenantId, tenantId);
+                if (oldTenantId != null && !tenantId.equals(oldTenantId)) {
+                    logger.info("检查到企业ID存在差异，{} => {}", oldTenantId, tenantId);
                 }
+
                 session.setAttribute(TenantConstants.TENANT_ID, tenantId);
             }
+
+            // 请求过来的话，那么都设置 ThreadLocal
+            DynamicDataSource.setCurTenant(tenantId);
         }
     }
 
@@ -166,7 +166,7 @@ public class RegisterTenantDatasource {
 
             // 等待了30s没获取到锁
             if (!isLocked) {
-                LOGGER.error("blockAndInitTenantDatasource getLock failed,[tenantId]:{}", tenantId);
+                logger.error("blockAndInitTenantDatasource getLock failed,[tenantId]:{}", tenantId);
                 throw new DynamicDataBaseException("init datasource failed,[tenantId]:" + tenantId);
             }
 
@@ -183,12 +183,12 @@ public class RegisterTenantDatasource {
             if (tenantDataSources != null) {
                 // 注册到动态数据源
                 DynamicDataSource.registerTenantDataSources(tenantId, tenantDataSources);
-                LOGGER.info("企业[{}]创建数据源成功", tenantId);
+                logger.info("企业[{}]创建数据源成功", tenantId);
             }
 
             return tenantDataSources;
         } catch (Exception e) {
-            LOGGER.error("根据企业ID[{}]获取数据源失败，原因：{}", tenantId, e.getMessage(), e);
+            logger.error("根据企业ID[{}]获取数据源失败，原因：{}", tenantId, e.getMessage(), e);
             return null;
         } finally {
             if (isLocked) {
@@ -242,7 +242,7 @@ public class RegisterTenantDatasource {
             // 等待了30s没获取到锁
             if (!isLocked) {
 
-                LOGGER.error("lazyCreateDataSourcePoolInfo getLock failed,[tenantId]: {}", dbinfo.getTenantId().toString());
+                logger.error("lazyCreateDataSourcePoolInfo getLock failed,[tenantId]: {}", dbinfo.getTenantId().toString());
                 throw new DynamicDataBaseException("init datasource failed,[tenantId]:" + dbinfo.getTenantId().toString());
             }
 
@@ -282,7 +282,7 @@ public class RegisterTenantDatasource {
 
             return new DataSourcePoolInfo(masterDsUnit);
         } catch (Exception e) {
-            LOGGER.warn("获取企业{}数据源失败,原因：{}", dbinfo.getTenantId(), e.getMessage());
+            logger.warn("获取企业{}数据源失败,原因：{}", dbinfo.getTenantId(), e.getMessage());
             return null;
         }
 
@@ -335,29 +335,63 @@ public class RegisterTenantDatasource {
     private static boolean checkIsIllegalTenant(TenantInfo tenantInfo) {
 
         if (tenantInfo == null) {
-            LOGGER.warn("创建Proxool数据源失败，原因：企业信息为空！");
+            logger.warn("创建Proxool数据源失败，原因：企业信息为空！");
             return true;
         }
 
         Long tenantId = tenantInfo.getId();
         if (tenantId == null) {
-            LOGGER.warn("创建Proxool数据源失败，原因：企业标识为空，无法设置proxool数据源别名！");
+            logger.warn("创建Proxool数据源失败，原因：企业标识为空，无法设置proxool数据源别名！");
             return true;
         }
 
         if (tenantInfo.getDbInfo() == null) {
-            LOGGER.warn("创建Proxool数据源失败，原因：dbinfo为空，无法设置proxool数据源属性！");
+            logger.warn("创建Proxool数据源失败，原因：dbinfo为空，无法设置proxool数据源属性！");
             return true;
         }
 
         //增加升级中状态
         if (!TenantConstants.STATUS_RUN.equals(tenantInfo.getStatus())) {
-            LOGGER.warn("创建Proxool数据源失败，原因：企业标识状态不是启动状态！");
+            logger.warn("创建Proxool数据源失败，原因：企业标识状态不是启动状态！");
             throw new TenantException("企业标识状态不是启动状态！");
         }
 
         return false;
 
+    }
+
+    /**
+     * 根据直接创建 企业信息 DbInfo
+     *
+     * @param tenantId 企业id
+     * @param dbInfo   企业数据库信息
+     * @return 数据库连接
+     */
+    public static Connection createJdbcConnectionByDbInfo(long tenantId, DbInfo dbInfo) {
+
+        if (dbInfo == null) {
+            TenantInfo tenantInfo = getTenantInfo(tenantId);
+            if (tenantInfo == null) {
+                return null;
+            }
+            dbInfo = tenantInfo.getDbInfo();
+        }
+
+        try {
+            String dbUrl = dbInfo.getJdbcUrl();
+            Properties props = new Properties();
+            props.setProperty("user", dbInfo.getDbUsername());
+            props.setProperty("password", dbInfo.getDbPassword());
+            // socket建立连接 1分钟，= 60s
+            props.setProperty("connectTimeout", "60");
+            // default as 10分钟，= 600s
+            props.setProperty("socketTimeout", "600");
+            return DriverManager.getConnection(dbUrl, props);
+        } catch (SQLException e) {
+            logger.error("DriverManager 创建 JDBC 企业{}连接失败,原因：{}", tenantId, e.getMessage());
+        }
+
+        return null;
     }
 
 
@@ -369,26 +403,15 @@ public class RegisterTenantDatasource {
      */
     public static Connection createJdbcConnectionByDbInfo(long tenantId) {
 
-        TenantInfo tenantInfo = getTenantInfo(tenantId);
-        if (tenantInfo == null) {
-            return null;
+        DbInfo dbInfo = null;
+        TenantDataSources tenantDataSources = DynamicDataSource.getTenantDataSources(tenantId);
+
+        // 获取到锁之后，发现已经被别人创建好了，那么直接获取，无需重复创建连接池
+        if (tenantDataSources != null) {
+            dbInfo = tenantDataSources.getDbInfo();
         }
 
-        try {
-            String dbUrl = tenantInfo.getDbInfo().getJdbcUrl();
-            Properties props = new Properties();
-            props.setProperty("user", tenantInfo.getDbInfo().getDbUsername());
-            props.setProperty("password", tenantInfo.getDbInfo().getDbPassword());
-            // socket建立连接 1分钟，= 60s
-            props.setProperty("connectTimeout", "60");
-            // default as 10分钟，= 600s
-            props.setProperty("socketTimeout", "600");
-            return DriverManager.getConnection(dbUrl, props);
-        } catch (SQLException e) {
-            LOGGER.error("DriverManager 创建 JDBC 企业{}连接失败,原因：{}", tenantId, e.getMessage());
-        }
-
-        return null;
+        return createJdbcConnectionByDbInfo(tenantId, dbInfo);
     }
 
     /**
@@ -402,7 +425,7 @@ public class RegisterTenantDatasource {
         try {
             return MasterTenantHandler.getTenantInfo(tenantId);
         } catch (Exception e) {
-            LOGGER.warn("获取JDBC 企业{}数据源失败,原因：{}", tenantId, e.getMessage());
+            logger.warn("获取JDBC 企业{}数据源失败,原因：{}", tenantId, e.getMessage());
         }
         return null;
     }

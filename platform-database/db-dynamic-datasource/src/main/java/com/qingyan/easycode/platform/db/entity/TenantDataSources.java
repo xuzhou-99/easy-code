@@ -49,6 +49,18 @@ public class TenantDataSources {
         this.dbInfo = dbinfo;
     }
 
+    public long getTenantId() {
+        return tenantId;
+    }
+
+    public DbInfo getDbInfo() {
+        return dbInfo;
+    }
+
+    public DataSourceUnit getMasterDataSource() {
+        return masterDataSource;
+    }
+
     public void setMasterDataSource(DataSourceUnit masterDataSource) {
         this.masterDataSource = masterDataSource;
     }
@@ -81,7 +93,7 @@ public class TenantDataSources {
     private Connection doGetConnectionFromJdbc(DataSourceTypeEnum dsEnum) {
 
         // 根据企业ID取得数据源
-        Connection conn = RegisterTenantDatasource.createJdbcConnectionByDbInfo(tenantId);
+        Connection conn = RegisterTenantDatasource.createJdbcConnectionByDbInfo(tenantId, dbInfo);
 
         if (conn != null) {
             logger.info("dynamic datasource getConnection from jdbc success, [tenantId] {} ,[dsType]:{}", tenantId
@@ -216,6 +228,6 @@ public class TenantDataSources {
                 lock.unlock();
             }
         }
-
     }
+
 }

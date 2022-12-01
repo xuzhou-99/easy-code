@@ -8,7 +8,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
-import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.datasource.lookup.AbstractRoutingDataSource;
@@ -147,8 +146,85 @@ public class DynamicDataSource extends AbstractRoutingDataSource {
         DatabaseRouter.removeOne();
     }
 
+    /**
+     * 尝试从各种渠道获取 tenantId
+     *
+     * @return tenantId
+     */
+    public static Long tryFetchTenantId() {
 
-    @NotNull
+        Long tenantId = currentTenantId.get();
+        if (tenantId != null) {
+            return tenantId;
+        }
+
+        RequestAttributes requestAttributes = RequestContextHolder.getRequestAttributes();
+        if (null != requestAttributes) {
+            // 获取 HttpServletRequest
+            HttpServletRequest request = (HttpServletRequest) requestAttributes.resolveReference(RequestAttributes.REFERENCE_REQUEST);
+            if (request != null) {
+                HttpSession session = request.getSession(false);
+                if (session != null && null != session.getAttribute(TenantConstants.TENANT_ID)) {
+                    tenantId = (Long) session.getAttribute(TenantConstants.TENANT_ID);
+                }
+            }
+        }
+
+        //如果session里的有效，设置到 ThreadLocal
+        if (tenantId != null && tenantId > 0) {
+            setCurTenant(tenantId);
+        } else {
+            log.info("从请求中无法获得当前企业ID！");
+        }
+
+        return tenantId;
+    }
+
+    /**
+     * 切换企业数据源
+     *
+     * @param tenantInfo 企业信息
+     * @return 数据源切换状态
+     */
+    public static int switchConnection(TenantInfo tenantInfo) {
+        if (tenantInfo == null) {
+            log.info("数据源连接切换失败，企业信息为空！");
+            return DynamicDataSourceStatusEnum.DATASOURCE_TENANT_NULL.getCode();
+        }
+
+        try {
+            if (RegisterTenantDatasource.getTenantDatasource(tenantInfo)) {
+                return DynamicDataSourceStatusEnum.DATASOURCE_SUCCESS.getCode();
+            }
+            if (TenantConstants.STATUS_STOP.equals(tenantInfo.getStatus())
+                    || TenantConstants.STATUS_FORBIDDEN.equals(tenantInfo.getStatus())
+                    || TenantConstants.STATUS_CANCELLATION.equals(tenantInfo.getStatus())) {
+                log.info("企业[{}]数据源连接切换失败，已经销户或停用！", tenantInfo.getName());
+                return DynamicDataSourceStatusEnum.DATASOURCE_TENANT_DEACTIVATED.getCode();
+            }
+        } catch (Exception e) {
+            log.warn("企业[{}]数据源连接切换失败，原因：{}", tenantInfo.getName(), e.getMessage());
+            return DynamicDataSourceStatusEnum.DATASOURCE_SEVER_ERROR.getCode();
+        }
+        return DynamicDataSourceStatusEnum.DATASOURCE_FAIL.getCode();
+    }
+
+    /**
+     * 切换数据源连接
+     *
+     * @param tenantId 企业Id
+     * @return 数据源切换状态
+     */
+    public static int switchConnection(Long tenantId) {
+        if (tenantId == null || tenantId < 0) {
+            log.info("数据源连接切换失败，企业信息为空！");
+            return DynamicDataSourceStatusEnum.DATASOURCE_TENANT_NULL.getCode();
+        }
+
+        TenantInfo tenantInfo = MasterTenantHandler.getTenantInfo(tenantId);
+        return switchConnection(tenantInfo);
+    }
+
     @Override
     public Connection getConnection() throws SQLException {
 
@@ -158,13 +234,13 @@ public class DynamicDataSource extends AbstractRoutingDataSource {
         // 根据企业ID取得数据源
         Connection conn = null;
 
+        if (DataSourceTypeEnum.POOL_MASTER_FORCE.equals(DatabaseRouter.getDsTypeLocal())) {
+            return getResolvedDefaultDataSource().getConnection();
+        }
+
         if (tenantId != null && tenantId > 0) {
             conn = doGetTenantConnection(tenantId);
         } else {
-
-            if (DatabaseRouter.getDsTypeLocal().equals(DataSourceTypeEnum.MASTER)) {
-                return getResolvedDefaultDataSource().getConnection();
-            }
 
             log.info("动态数据源无法获得当前企业ID！[tenantId]:{}", tenantId);
             throw new TenantNotExistException("当前企业Id为空");
@@ -195,7 +271,6 @@ public class DynamicDataSource extends AbstractRoutingDataSource {
         log.info("determineCurrentLookupKey");
         return null;
     }
-
 
     /**
      * 获取企业数据源连接
@@ -239,103 +314,6 @@ public class DynamicDataSource extends AbstractRoutingDataSource {
             //抛出异常认为企业信息获取不到，即使是因为网络原因获取不到的，也没关系，因为connection 为空
             return true;
         }
-    }
-
-
-    /**
-     * 尝试从各种渠道获取 tenantId
-     *
-     * @return tenantId
-     */
-    public static Long tryFetchTenantId() {
-
-        Long tenantId = currentTenantId.get();
-        if (tenantId != null) {
-            return tenantId;
-        }
-
-        RequestAttributes requestAttributes = RequestContextHolder.getRequestAttributes();
-        if (null != requestAttributes) {
-            // 获取 HttpServletRequest
-            HttpServletRequest request = (HttpServletRequest) requestAttributes.resolveReference(RequestAttributes.REFERENCE_REQUEST);
-            if (request != null) {
-                HttpSession session = request.getSession(false);
-                if (session != null) {
-                    tenantId = (Long) session.getAttribute(TenantConstants.TENANT_ID);
-                }
-            }
-        }
-
-        //如果session里的有效，设置到 ThreadLocal
-        if (tenantId != null && tenantId > 0) {
-            setCurTenant(tenantId);
-        } else {
-            log.info("从请求中无法获得当前企业ID！");
-        }
-
-        return tenantId;
-    }
-
-    /**
-     * 切换企业数据源
-     *
-     * @param tenantInfo 企业信息
-     * @return 切换数据源
-     */
-    public static int switchConnection(TenantInfo tenantInfo) {
-        if (tenantInfo == null) {
-            log.info("数据源连接切换失败，企业信息为空！");
-            return DynamicDataSourceStatusEnum.DATASOURCE_TENANT_NULL.getCode();
-        }
-
-        try {
-            if (RegisterTenantDatasource.getTenantDatasource(tenantInfo)) {
-                return DynamicDataSourceStatusEnum.DATASOURCE_SUCCESS.getCode();
-            } else {
-                if (TenantConstants.STATUS_STOP.equals(tenantInfo.getStatus())
-                        || TenantConstants.STATUS_FORBIDDEN.equals(tenantInfo.getStatus())
-                        || TenantConstants.STATUS_CANCELLATION.equals(tenantInfo.getStatus())) {
-                    log.info("企业[{}]数据源连接切换失败，已经销户或停用！", tenantInfo.getName());
-                    return DynamicDataSourceStatusEnum.DATASOURCE_TENANT_STOPED.getCode();
-                }
-            }
-        } catch (Exception e) {
-            log.warn("企业[{}]数据源连接切换失败，原因：{}", tenantInfo.getName(), e.getMessage());
-            return DynamicDataSourceStatusEnum.DATASOURCE_SEVER_ERROR.getCode();
-        }
-        return DynamicDataSourceStatusEnum.DATASOURCE_FAIL.getCode();
-    }
-
-    /**
-     * 切换数据源连接
-     *
-     * @param tenantId 请求信息
-     * @return 数据源切换成功与否 true/false
-     */
-    public static int switchConnection(Long tenantId) {
-        if (tenantId == null || tenantId < 0) {
-            log.info("数据源连接切换失败，企业信息为空！");
-            return DynamicDataSourceStatusEnum.DATASOURCE_TENANT_NULL.getCode();
-        }
-
-        try {
-            if (RegisterTenantDatasource.getTenantDatasource(tenantId)) {
-                return DynamicDataSourceStatusEnum.DATASOURCE_SUCCESS.getCode();
-            } else {
-                TenantInfo tenantInfo = MasterTenantHandler.getTenantInfo(tenantId);
-
-                if (TenantConstants.STATUS_STOP.equals(tenantInfo.getStatus())
-                        || TenantConstants.STATUS_FORBIDDEN.equals(tenantInfo.getStatus())
-                        || TenantConstants.STATUS_CANCELLATION.equals(tenantInfo.getStatus())) {
-                    log.info("企业[{}]数据源连接切换失败，已经销户或停用！", tenantInfo.getName());
-                    return DynamicDataSourceStatusEnum.DATASOURCE_TENANT_STOPED.getCode();
-                }
-            }
-        } catch (Exception e) {
-            log.warn("企业[{}]数据源连接切换失败，原因：{}", tenantId, e.getMessage());
-            return DynamicDataSourceStatusEnum.DATASOURCE_SEVER_ERROR.getCode();
-        }
-        return DynamicDataSourceStatusEnum.DATASOURCE_FAIL.getCode();
     }
 
 }
