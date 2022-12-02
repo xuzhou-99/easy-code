@@ -4,6 +4,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import com.qingyan.easycode.platform.db.connect.JdbcConnectionManager;
+import com.qingyan.easycode.platform.db.filter.DynamicThreadLocalInterceptor;
 import com.qingyan.easycode.platform.db.register.DynamicRegister;
 
 /**
@@ -28,6 +29,11 @@ public class EasyCodeDataBaseAutoConfiguration {
     @Bean
     public JdbcConnectionManager jdbcConnectionManager() {
         return new JdbcConnectionManager();
+    }
+
+    @Bean
+    public DynamicThreadLocalInterceptor threadLocalInterceptor() {
+        return new DynamicThreadLocalInterceptor();
     }
 
 }
