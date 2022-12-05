@@ -28,6 +28,9 @@ import lombok.Getter;
 
 /**
  * 日志异常枚举
+ *
+ * @author xuzhou
+ * @since 2022-12-05
  */
 @Getter
 public enum LogExceptionEnum {

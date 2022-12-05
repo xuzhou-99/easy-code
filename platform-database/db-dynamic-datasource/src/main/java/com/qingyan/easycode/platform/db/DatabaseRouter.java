@@ -14,7 +14,7 @@ import com.qingyan.easycode.platform.db.constans.DataSourceTypeEnum;
  */
 public class DatabaseRouter {
 
-    private static final ExtendAnnotationThreadLocal<DataSourceTypeEnum> dsTypeLocal = new ExtendAnnotationThreadLocal<>();
+    private static final ExtendAnnotationThreadLocal<DataSourceTypeEnum> DS_TYPE_LOCAL = new ExtendAnnotationThreadLocal<>();
 
 
     private DatabaseRouter() {
@@ -30,9 +30,9 @@ public class DatabaseRouter {
     @SuppressWarnings("deprecation")
     public static void setDataSourceType(Database database) {
 
-        DataSourceTypeEnum type = database.DataSourceType();
+        DataSourceTypeEnum type = database.dataSourceType();
         Assert.notNull(type);
-        dsTypeLocal.set(type);
+        DS_TYPE_LOCAL.set(type);
     }
 
 
@@ -44,7 +44,7 @@ public class DatabaseRouter {
     public static void setDataSourceType(DataSourceTypeEnum databaseType) {
 
         Assert.notNull(databaseType, "数据源类型不能为空！");
-        dsTypeLocal.set(databaseType);
+        DS_TYPE_LOCAL.set(databaseType);
     }
 
 
@@ -52,7 +52,7 @@ public class DatabaseRouter {
      * 清理本层的
      */
     public static void removeOne() {
-        dsTypeLocal.removeOne();
+        DS_TYPE_LOCAL.removeOne();
     }
 
 
@@ -60,7 +60,7 @@ public class DatabaseRouter {
      * 清理所有的
      */
     public static void removeAll() {
-        dsTypeLocal.remove();
+        DS_TYPE_LOCAL.remove();
     }
 
 
@@ -70,7 +70,7 @@ public class DatabaseRouter {
      * @return 数据源类型
      */
     public static DataSourceTypeEnum getDsTypeLocal() {
-        return dsTypeLocal.get();
+        return DS_TYPE_LOCAL.get();
     }
 
     /**
@@ -80,7 +80,7 @@ public class DatabaseRouter {
      */
     public static DataSourceTypeEnum determineDataSourceType() {
 
-        DataSourceTypeEnum val = dsTypeLocal.get();
+        DataSourceTypeEnum val = DS_TYPE_LOCAL.get();
 
         return val == null ? DataSourceTypeEnum.POOL_MASTER : val;
     }

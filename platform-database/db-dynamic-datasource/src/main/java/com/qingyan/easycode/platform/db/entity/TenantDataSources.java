@@ -192,9 +192,9 @@ public class TenantDataSources {
 
         try {
             ProxoolFacade.removeConnectionPool(dsUnit.getAliasName());
-            logger.info("removeConnectionFromPool success![dsUnit]:" + dsUnit.getAliasName());
+            logger.info("removeConnectionFromPool success![dsUnit]:{}", dsUnit.getAliasName());
         } catch (Exception e) {
-            logger.error("removeConnectionFromPool failed![dsUnit]:" + dsUnit.getAliasName(), e);
+            logger.error("removeConnectionFromPool failed![dsUnit]:{}", dsUnit.getAliasName(), e);
         }
     }
 

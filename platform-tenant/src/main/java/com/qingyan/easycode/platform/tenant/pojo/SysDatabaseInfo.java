@@ -11,7 +11,9 @@ import com.baomidou.mybatisplus.annotation.TableName;
 /**
  * 多数据源信息
  *
+ * @author xuzhou
  * @TableName sys_database_info
+ * @since 2022-12-05
  */
 @TableName("sys_database_info")
 public class SysDatabaseInfo implements Serializable {

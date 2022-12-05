@@ -48,7 +48,7 @@ public class RedisUtil {
                 redisTemplate.expire(k, time, timeUnit);
             }
             return true;
-        } catch (Throwable e) {
+        } catch (Exception e) {
             log.error("缓存存入失败key:[{}] value:[{}]", k, v);
         }
         return false;
@@ -70,7 +70,7 @@ public class RedisUtil {
                 redisTemplate.expire(k, time, TimeUnit.SECONDS);
             }
             return true;
-        } catch (Throwable e) {
+        } catch (Exception e) {
             log.error("缓存存入失败key:[{}] value:[{}]", k, v);
         }
         return false;
@@ -105,10 +105,10 @@ public class RedisUtil {
                 redisTemplate.expire(k, time, TimeUnit.SECONDS);
             }
             return setFlag;
-        } catch (Throwable e) {
+        } catch (Exception e) {
             log.error("setNX执行失败key:[{}] value:[{}]", k, v);
         }
-        return null;
+        return false;
     }
 
 
@@ -133,7 +133,7 @@ public class RedisUtil {
     public boolean containsKey(String key) {
         try {
             return Boolean.TRUE.equals(redisTemplate.hasKey(key));
-        } catch (Throwable e) {
+        } catch (Exception e) {
             log.error("判断缓存存在失败key:[" + key + "],错误信息 [{}]", e);
         }
         return false;
@@ -173,7 +173,7 @@ public class RedisUtil {
                 redisTemplate.expire(k, time, TimeUnit.SECONDS);
             }
             return true;
-        } catch (Throwable e) {
+        } catch (Exception e) {
             log.error("缓存 set 失败 当前 key:[{}] 失败原因 [{}]", k, e);
         }
         return false;
@@ -195,7 +195,7 @@ public class RedisUtil {
                 redisTemplate.expire(k, time, timeUnit);
             }
             return true;
-        } catch (Throwable e) {
+        } catch (Exception e) {
             log.error("缓存 set 失败 当前 key:[{}] 失败原因 [{}]", k, e);
         }
         return false;
@@ -230,7 +230,7 @@ public class RedisUtil {
                 redisTemplate.expire(k, time, TimeUnit.SECONDS);
             }
             return true;
-        } catch (Throwable e) {
+        } catch (Exception e) {
             log.error("缓存 set 失败 当前 key:[{}],失败原因 [{}]", k, e);
         }
         return false;
@@ -259,7 +259,7 @@ public class RedisUtil {
         try {
             SetOperations<String, Object> opsForSet = redisTemplate.opsForSet();
             return opsForSet.members(k);
-        } catch (Throwable e) {
+        } catch (Exception e) {
             log.error("获取缓存set失败 当前 key:[{}],失败原因 [{}]", k, e);
         }
         return Collections.emptySet();
@@ -282,7 +282,7 @@ public class RedisUtil {
                 redisTemplate.expire(k, time, TimeUnit.SECONDS);
             }
             return true;
-        } catch (Throwable e) {
+        } catch (Exception e) {
             log.error("缓存 hash 失败 当前 key:[{}] 失败原因 [{}]", k, e);
         }
         return false;
@@ -330,7 +330,7 @@ public class RedisUtil {
                 redisTemplate.expire(k, time, TimeUnit.SECONDS);
             }
             return true;
-        } catch (Throwable e) {
+        } catch (Exception e) {
             log.error("缓存 hash 失败 当前 key:[{}],失败原因 [{}]", k, e);
         }
         return false;
@@ -359,7 +359,7 @@ public class RedisUtil {
         try {
             HashOperations<String, String, Object> opsForHash = redisTemplate.opsForHash();
             return opsForHash.get(k, hashKey);
-        } catch (Throwable e) {
+        } catch (Exception e) {
             log.error("获取缓存 hash 失败 当前 key:[{}],失败原因 [{}]", k, e);
         }
         return null;
@@ -375,7 +375,7 @@ public class RedisUtil {
         try {
             HashOperations<String, String, Object> opsForHash = redisTemplate.opsForHash();
             return opsForHash.entries(k);
-        } catch (Throwable e) {
+        } catch (Exception e) {
             log.error("获取缓存 hash 失败 当前 key:[{}],失败原因 [{}]", k, e);
         }
         return Collections.emptyMap();
@@ -399,7 +399,7 @@ public class RedisUtil {
                 redisTemplate.expire(k, time, TimeUnit.SECONDS);
             }
             return true;
-        } catch (Throwable e) {
+        } catch (Exception e) {
             log.error("缓存list失败 当前 key:[{}],失败原因 [{}]", k, e);
         }
         return false;
@@ -434,7 +434,7 @@ public class RedisUtil {
                 redisTemplate.expire(k, time, TimeUnit.SECONDS);
             }
             return true;
-        } catch (Throwable e) {
+        } catch (Exception e) {
             log.error("缓存list失败 当前 key:[{}],失败原因 [{}]", k, e);
         }
         return false;
@@ -465,7 +465,7 @@ public class RedisUtil {
         try {
             ListOperations<String, Object> opsForList = redisTemplate.opsForList();
             return opsForList.range(k, start, end);
-        } catch (Throwable e) {
+        } catch (Exception e) {
             log.error("获取list缓存失败 当前 key:[{}],失败原因 [{}]", k, e);
         }
         return Collections.emptyList();
@@ -482,7 +482,7 @@ public class RedisUtil {
         try {
             ListOperations<String, Object> opsForList = redisTemplate.opsForList();
             return opsForList.size(key);
-        } catch (Throwable e) {
+        } catch (Exception e) {
             log.error("获取list长度失败 key[{}],[{}]", key, e);
         }
         return 0;
@@ -499,7 +499,7 @@ public class RedisUtil {
     public long getListSize(ListOperations<String, String> listOps, String k) {
         try {
             return listOps.size(k);
-        } catch (Throwable e) {
+        } catch (Exception e) {
             log.error("获取list长度失败 key[{}],[{}]", k, e);
         }
         return 0;
@@ -517,7 +517,7 @@ public class RedisUtil {
             ListOperations<String, Object> opsForList = redisTemplate.opsForList();
             opsForList.rightPop(k);
             return true;
-        } catch (Throwable e) {
+        } catch (Exception e) {
             log.error("移除list缓存失败 key[{}],[{}]", k, e);
         }
         return false;
@@ -577,7 +577,7 @@ public class RedisUtil {
         try {
             redisTemplate.delete(key);
             return true;
-        } catch (Throwable e) {
+        } catch (Exception e) {
             log.error("移除缓存失败 key:[{}] 失败原因 [{}]", key, e);
         }
         return false;

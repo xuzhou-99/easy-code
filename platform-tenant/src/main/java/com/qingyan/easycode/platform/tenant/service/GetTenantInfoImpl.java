@@ -10,6 +10,7 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.qingyan.easycode.platform.tenant.constans.TenantConstants;
 import com.qingyan.easycode.platform.tenant.entity.DbInfo;
 import com.qingyan.easycode.platform.tenant.entity.TenantInfo;
 import com.qingyan.easycode.platform.tenant.entity.vo.GetAllTenantIdResponse;
@@ -51,7 +52,7 @@ public class GetTenantInfoImpl implements IGetTenantInfo {
             GetTenantInfoResponse response = new GetTenantInfoResponse();
             response.setTenantId(tenantId);
             response.setTenantInfo(null);
-            response.setResultCode("501");
+            response.setResultCode(TenantConstants.REQUEST_STATUS_NOT_FOUND);
             response.setResultMessage(tenantId + " 企业不存在！");
             return response;
         }
@@ -68,7 +69,7 @@ public class GetTenantInfoImpl implements IGetTenantInfo {
         GetTenantInfoResponse response = new GetTenantInfoResponse();
         response.setTenantId(tenantId);
         response.setTenantInfo(tenantInfo);
-        response.setResultCode("200");
+        response.setResultCode(TenantConstants.REQUEST_STATUS_SUCCESS);
         return response;
     }
 
@@ -99,7 +100,7 @@ public class GetTenantInfoImpl implements IGetTenantInfo {
             GetAllTenantIdResponse response = new GetAllTenantIdResponse();
             response.setTenantIds(Collections.emptyList());
             response.setResultMessage("当前系统无租户信息");
-            response.setResultCode("501");
+            response.setResultCode(TenantConstants.REQUEST_STATUS_NO_INFO);
             return response;
         }
 
@@ -107,7 +108,7 @@ public class GetTenantInfoImpl implements IGetTenantInfo {
 
         GetAllTenantIdResponse response = new GetAllTenantIdResponse();
         response.setTenantIds(list);
-        response.setResultCode("200");
+        response.setResultCode(TenantConstants.REQUEST_STATUS_SUCCESS);
         return response;
     }
 
@@ -123,7 +124,7 @@ public class GetTenantInfoImpl implements IGetTenantInfo {
             response.setTenantId(null);
             response.setTenantInfo(null);
             response.setResultMessage(request.getTenantCode() + " 企业不存在！");
-            response.setResultCode("501");
+            response.setResultCode(TenantConstants.REQUEST_STATUS_NOT_FOUND);
             return response;
         }
 
@@ -140,7 +141,7 @@ public class GetTenantInfoImpl implements IGetTenantInfo {
         GetTenantInfoResponse response = new GetTenantInfoResponse();
         response.setTenantId(tenantInfo.getId());
         response.setTenantInfo(tenantInfo);
-        response.setResultCode("200");
+        response.setResultCode(TenantConstants.REQUEST_STATUS_SUCCESS);
         return response;
     }
 }

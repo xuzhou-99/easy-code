@@ -78,7 +78,7 @@ public class JdbcConnectionManager extends Thread {
                     connectionWapper = JDBC_POOL.get(key).take();
                 } else {
                     log.info("key为【{}】无可用的连接，开始创建连接", key);
-                    connectionWapper = createConnnection(dbType, jdbcUrl, username, password);
+                    connectionWapper = createConnection(dbType, jdbcUrl, username, password);
                     CONNECTION_NUMLIMIT.put(key, CONNECTION_NUMLIMIT.get(key) + 1);
                 }
             }
@@ -100,7 +100,7 @@ public class JdbcConnectionManager extends Thread {
      * @throws SQLException
      * @throws ClassNotFoundException
      */
-    private static ConnectionWapper createConnnection(String dbType, String jdbcUrl, String username, String password) throws SQLException, ClassNotFoundException {
+    private static ConnectionWapper createConnection(String dbType, String jdbcUrl, String username, String password) throws SQLException, ClassNotFoundException {
         String key = dbType + "-" + jdbcUrl;
         DbEngineEnum dbEngineEnum = null;
         for (DbEngineEnum tmp : DbEngineEnum.values()) {
@@ -134,9 +134,9 @@ public class JdbcConnectionManager extends Thread {
                 log.error("sleep error", e);
             }
             int size = 0;
-            for (String key : JDBC_POOL.keySet()) {
-                LinkedBlockingQueue<ConnectionWapper> queue = JDBC_POOL.get(key);
-                log.info("---------------------开始校验连接池中是否有过期连接，size:【{}】 key:【{}】 ---------------------", queue.size(), key);
+            for (Map.Entry<String, LinkedBlockingQueue<ConnectionWapper>> entry : JDBC_POOL.entrySet()) {
+                LinkedBlockingQueue<ConnectionWapper> queue = entry.getValue();
+                log.info("---------------------开始校验连接池中是否有过期连接，size:【{}】 key:【{}】 ---------------------", queue.size(), entry.getKey());
                 synchronized (JdbcConnectionManager.class) {
                     Integer num = 0;
                     // 头部的肯定是时间最早的，只需要判断头部的时间是否超时即可
@@ -144,7 +144,7 @@ public class JdbcConnectionManager extends Thread {
                         ConnectionWapper connectionWapper = queue.poll();
                         if (connectionWapper != null) {
                             try {
-                                log.info("关闭空闲jdbc连接:{}", key);
+                                log.info("关闭空闲jdbc连接:{}", entry.getKey());
                                 connectionWapper.closeConnection();
                             } catch (SQLException e) {
                                 log.error("关闭连接失败", e);
@@ -153,7 +153,7 @@ public class JdbcConnectionManager extends Thread {
                         }
 
                     }
-                    CONNECTION_NUMLIMIT.put(key, CONNECTION_NUMLIMIT.get(key) + num);
+                    CONNECTION_NUMLIMIT.put(entry.getKey(), CONNECTION_NUMLIMIT.get(entry.getKey()) + num);
                 }
                 size += queue.size();
             }

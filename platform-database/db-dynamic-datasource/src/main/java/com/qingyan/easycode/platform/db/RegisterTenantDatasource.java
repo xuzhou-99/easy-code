@@ -31,16 +31,19 @@ import com.qingyan.easycode.platform.tenant.exception.TenantException;
 
 /**
  * 企业数据源注册
+ *
+ * @author xuzhou
+ * @since 2022-12-05
  */
 public class RegisterTenantDatasource {
 
-    public static final String connectionTestBefore = "0";
-    public static final int connectionSleepKeepTime = Integer.parseInt("2000");
+    public static final String CONNECTION_TEST_BEFORE = "0";
+    public static final int CONNECTION_SLEEP_KEEP_TIME = Integer.parseInt("2000");
     private static final Logger logger = LoggerFactory.getLogger(RegisterTenantDatasource.class);
     /**
      * hash 锁
      */
-    private static final SegmentLock<String> segmentLock = new SegmentLock<>(30, false);
+    private static final SegmentLock<String> SEGMENT_LOCK = new SegmentLock<>(30, false);
 
     private RegisterTenantDatasource() {
 
@@ -162,7 +165,7 @@ public class RegisterTenantDatasource {
 
         try {
             // 尝试hash锁
-            isLocked = segmentLock.lock(tenantId.toString(), 30, TimeUnit.SECONDS);
+            isLocked = SEGMENT_LOCK.lock(tenantId.toString(), 30, TimeUnit.SECONDS);
 
             // 等待了30s没获取到锁
             if (!isLocked) {
@@ -192,7 +195,7 @@ public class RegisterTenantDatasource {
             return null;
         } finally {
             if (isLocked) {
-                segmentLock.unlock(tenantId.toString());
+                SEGMENT_LOCK.unlock(tenantId.toString());
             }
         }
     }
@@ -237,12 +240,12 @@ public class RegisterTenantDatasource {
 
         try {
             // 尝试hash锁
-            isLocked = segmentLock.lock(dbinfo.getTenantId().toString(), 30, TimeUnit.SECONDS);
+            isLocked = SEGMENT_LOCK.lock(dbinfo.getTenantId().toString(), 30, TimeUnit.SECONDS);
 
             // 等待了30s没获取到锁
             if (!isLocked) {
 
-                logger.error("lazyCreateDataSourcePoolInfo getLock failed,[tenantId]: {}", dbinfo.getTenantId().toString());
+                logger.error("lazyCreateDataSourcePoolInfo getLock failed,[tenantId]: {}", dbinfo.getTenantId());
                 throw new DynamicDataBaseException("init datasource failed,[tenantId]:" + dbinfo.getTenantId().toString());
             }
 
@@ -257,7 +260,7 @@ public class RegisterTenantDatasource {
 
         } finally {
             if (isLocked) {
-                segmentLock.unlock(dbinfo.getTenantId().toString());
+                SEGMENT_LOCK.unlock(dbinfo.getTenantId().toString());
             }
         }
 
@@ -310,11 +313,11 @@ public class RegisterTenantDatasource {
         pds.setMinimumConnectionCount(dbInfo.getMinConnCount());
         pds.setMaximumConnectionCount(dbInfo.getMaxConnCount());
         // 空闲数据库连接断开的时间使用数据库的sleep_keep_time
-        pds.setHouseKeepingSleepTime(connectionSleepKeepTime);
+        pds.setHouseKeepingSleepTime(CONNECTION_SLEEP_KEEP_TIME);
         // 同一时刻允许申请最大连接数
         pds.setSimultaneousBuildThrottle(50);
         // 增加数据库连接重试机制
-        if ("1".equals(connectionTestBefore)) {
+        if ("1".equals(CONNECTION_TEST_BEFORE)) {
             pds.setTestBeforeUse(true);
         } else {
             pds.setTestBeforeUse(false);

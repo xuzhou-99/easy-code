@@ -1,2 +1,3 @@
 org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
-  com.qingyan.easycode.platform.db.starter.EasyCodeDataBaseAutoConfiguration
+  com.qingyan.easycode.platform.db.starter.EasyCodeDataBaseAutoConfiguration,\
+  com.qingyan.easycode.platform.db.filter.InterceptorConfig

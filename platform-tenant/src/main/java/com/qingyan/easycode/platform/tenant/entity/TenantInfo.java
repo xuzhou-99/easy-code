@@ -20,7 +20,7 @@ public class TenantInfo implements Serializable {
     /**
      * 企业数据源信息
      */
-    public DbInfo dbInfo;
+    private DbInfo dbInfo;
     /**
      * 实体标识.
      */

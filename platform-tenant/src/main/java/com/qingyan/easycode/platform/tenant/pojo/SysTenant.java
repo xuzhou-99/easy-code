@@ -8,7 +8,9 @@ import com.baomidou.mybatisplus.annotation.TableName;
 /**
  * 系统租户信息表
  *
+ * @author xuzhou
  * @TableName sys_tenant
+ * @since 2022-12-05
  */
 @TableName("sys_tenant")
 public class SysTenant implements Serializable {

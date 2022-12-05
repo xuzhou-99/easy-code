@@ -15,7 +15,6 @@ import java.sql.SQLXML;
 import java.sql.Savepoint;
 import java.sql.Statement;
 import java.sql.Struct;
-import java.util.Date;
 import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.Executor;
@@ -49,7 +48,7 @@ public class ConnectionWapper implements Connection {
     public ConnectionWapper(Connection connection, LinkedBlockingQueue<ConnectionWapper> pool) {
         this.connection = connection;
         this.pool = pool;
-        this.activeTime = new Date().getTime();
+        this.activeTime = System.currentTimeMillis();
     }
 
     /**
@@ -58,10 +57,7 @@ public class ConnectionWapper implements Connection {
      * @return
      */
     public boolean checkTimeOut() {
-        if ((new Date().getTime() - this.activeTime) > JdbcConnectionManager.CONN_TIMEOUT) {
-            return true;
-        }
-        return false;
+        return (System.currentTimeMillis() - this.activeTime) > JdbcConnectionManager.CONN_TIMEOUT;
     }
 
     /**
@@ -81,7 +77,7 @@ public class ConnectionWapper implements Connection {
     @Override
     public void close() throws SQLException {
         log.info("-------------------------------------开始执行连接回收操作-------------------------------------");
-        this.activeTime = new Date().getTime();
+        this.activeTime = System.currentTimeMillis();
         pool.add(this);
         log.info("-------------------------------------连接回收完毕-------------------------------------");
     }

@@ -7,6 +7,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
+import javax.sql.DataSource;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,6 +16,7 @@ import org.springframework.util.Assert;
 import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.context.request.RequestContextHolder;
 
+import com.qingyan.easycode.platform.core.exception.BizException;
 import com.qingyan.easycode.platform.db.constans.DataSourceTypeEnum;
 import com.qingyan.easycode.platform.db.constans.DynamicDataSourceStatusEnum;
 import com.qingyan.easycode.platform.db.entity.TenantDataSources;
@@ -35,11 +37,11 @@ public class DynamicDataSource extends AbstractRoutingDataSource {
     /**
      * 存储已经注册的数据源的key-value
      */
-    private static final Map<String, TenantDataSources> tenantDataSourcesMap = new ConcurrentHashMap<>();
+    private static final Map<String, TenantDataSources> TENANT_DATA_SOURCES_MAP = new ConcurrentHashMap<>();
     /**
      * 用于存放当前线程的企业信息 适用于没有request对象的后台程序切换数据源
      */
-    private static final ThreadLocal<Long> currentTenantId = new ThreadLocal<>();
+    private static final ThreadLocal<Long> CURRENT_TENANT_ID = new ThreadLocal<>();
 
 
     /**
@@ -55,7 +57,7 @@ public class DynamicDataSource extends AbstractRoutingDataSource {
         Assert.notNull(tenantId, "register tenant dataSources need tenantId not null");
         Assert.notNull(tenantDataSources, "register tenant dataSources need tenantDataSources not null");
 
-        tenantDataSourcesMap.put(tenantId.toString(), tenantDataSources);
+        TENANT_DATA_SOURCES_MAP.put(tenantId.toString(), tenantDataSources);
     }
 
     /**
@@ -72,7 +74,7 @@ public class DynamicDataSource extends AbstractRoutingDataSource {
         log.info("DynamicDatasource receive command to remove dataSource,[tenantId]:{}", tenantId);
 
         //从缓存map删除
-        TenantDataSources tenantDataSources = tenantDataSourcesMap.remove(tenantId.toString());
+        TenantDataSources tenantDataSources = TENANT_DATA_SOURCES_MAP.remove(tenantId.toString());
 
         //删除 的缓存key，创建jdbc连接时生成的缓存
         MasterTenantHandler.deleteDbInfoCache(tenantId);
@@ -92,7 +94,7 @@ public class DynamicDataSource extends AbstractRoutingDataSource {
      * @return 企业数据源
      */
     public static TenantDataSources getTenantDataSources(Long tenantId) {
-        return tenantDataSourcesMap.get(tenantId.toString());
+        return TENANT_DATA_SOURCES_MAP.get(tenantId.toString());
     }
 
     /**
@@ -102,7 +104,7 @@ public class DynamicDataSource extends AbstractRoutingDataSource {
      * @return 是否已有数据源缓存
      */
     public static boolean isDataSourceExist(Long tenantId) {
-        return tenantDataSourcesMap.containsKey(tenantId.toString());
+        return TENANT_DATA_SOURCES_MAP.containsKey(tenantId.toString());
     }
 
     /**
@@ -111,7 +113,7 @@ public class DynamicDataSource extends AbstractRoutingDataSource {
      * @return Long
      */
     public static Long getCurTenant() {
-        return currentTenantId.get();
+        return CURRENT_TENANT_ID.get();
     }
 
     /**
@@ -122,7 +124,7 @@ public class DynamicDataSource extends AbstractRoutingDataSource {
     public static void setCurTenant(Long tenantId) {
         if (tenantId != null && tenantId > 0) {
             log.info("setCurTenant datasource ThreadLocal:{}", tenantId);
-            currentTenantId.set(tenantId);
+            CURRENT_TENANT_ID.set(tenantId);
         }
     }
 
@@ -130,9 +132,9 @@ public class DynamicDataSource extends AbstractRoutingDataSource {
      * 清除当前线程中的TenantId
      */
     public static void clearCurTenant() {
-        Long tenantId = currentTenantId.get();
+        Long tenantId = CURRENT_TENANT_ID.get();
         if (tenantId != null && tenantId > 0) {
-            currentTenantId.remove();
+            CURRENT_TENANT_ID.remove();
         }
 
         // 清楚tag
@@ -153,7 +155,7 @@ public class DynamicDataSource extends AbstractRoutingDataSource {
      */
     public static Long tryFetchTenantId() {
 
-        Long tenantId = currentTenantId.get();
+        Long tenantId = CURRENT_TENANT_ID.get();
         if (tenantId != null) {
             return tenantId;
         }
@@ -235,7 +237,11 @@ public class DynamicDataSource extends AbstractRoutingDataSource {
         Connection conn = null;
 
         if (DataSourceTypeEnum.POOL_MASTER_FORCE.equals(DatabaseRouter.getDsTypeLocal())) {
-            return getResolvedDefaultDataSource().getConnection();
+            DataSource defaultDataSource = getResolvedDefaultDataSource();
+            if (null == defaultDataSource) {
+                throw new BizException("当前服务未设置主数据源，请指定 master 数据源！");
+            }
+            return defaultDataSource.getConnection();
         }
 
         if (tenantId != null && tenantId > 0) {
@@ -281,7 +287,7 @@ public class DynamicDataSource extends AbstractRoutingDataSource {
      */
     private Connection doGetTenantConnection(long tenantId) throws SQLException {
 
-        TenantDataSources tenantDataSources = tenantDataSourcesMap.get(String.valueOf(tenantId));
+        TenantDataSources tenantDataSources = TENANT_DATA_SOURCES_MAP.get(String.valueOf(tenantId));
 
         if (tenantDataSources == null) {
             // 初始化主库和从库

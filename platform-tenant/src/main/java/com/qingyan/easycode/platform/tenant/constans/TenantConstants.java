@@ -48,6 +48,25 @@ public class TenantConstants {
      */
     public static final String STATUS_UPGRADING = "4";
 
+    // ******************* 请求状态码 **********************
+
+    /**
+     * 查询成功
+     */
+    public static final String REQUEST_STATUS_SUCCESS = "200";
+    /**
+     * 查询失败
+     */
+    public static final String REQUEST_STATUS_FAIL = "500";
+    /**
+     * 未查询到指定数据
+     */
+    public static final String REQUEST_STATUS_NOT_FOUND = "501";
+    /**
+     * 查询数据为空
+     */
+    public static final String REQUEST_STATUS_NO_INFO = "502";
+
     private TenantConstants() {
 
     }

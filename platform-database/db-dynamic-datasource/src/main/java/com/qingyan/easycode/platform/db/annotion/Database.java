@@ -21,13 +21,13 @@ public @interface Database {
      *
      * @return
      */
-    DataSourceTypeEnum DataSourceType() default DataSourceTypeEnum.POOL_MASTER;
+    DataSourceTypeEnum dataSourceType() default DataSourceTypeEnum.POOL_MASTER;
 
     /**
      * 指定数据源,可以配合@Transactional一起使用.
      *
      * @return
      */
-    String DataSource() default "";
+    String dataSource() default "";
 
 }

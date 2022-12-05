@@ -9,6 +9,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.util.Assert;
 
 import com.alibaba.fastjson.JSON;
+import com.qingyan.easycode.platform.tenant.constans.TenantConstants;
 import com.qingyan.easycode.platform.tenant.entity.TenantInfo;
 import com.qingyan.easycode.platform.tenant.entity.vo.GetAllTenantIdResponse;
 import com.qingyan.easycode.platform.tenant.entity.vo.GetTenantInfoRequest;
@@ -37,7 +38,7 @@ public final class TenantHandler {
      * 企业信息缓存
      */
     public static final String TENANT_INFO_CACHE_KEY_PREFIX = "tenant:info:";
-    public static final int dbCacheHours = 48;
+    public static final int DB_CACHE_HOURS = 48;
     private static final Logger logger = LoggerFactory.getLogger(TenantHandler.class);
     private static RedisUtil redisUtil;
 
@@ -83,7 +84,7 @@ public final class TenantHandler {
             tenantInfo = doGetTenant(tenantId);
             getStringRedisTemplate();
             String cacheKey = getDbInfoCacheKey(tenantId);
-            redisUtil.cacheValue(cacheKey, JSON.toJSONString(tenantInfo), dbCacheHours, TimeUnit.HOURS);
+            redisUtil.cacheValue(cacheKey, JSON.toJSONString(tenantInfo), DB_CACHE_HOURS, TimeUnit.HOURS);
 
             return tenantInfo;
         } catch (Exception e) {
@@ -155,7 +156,7 @@ public final class TenantHandler {
         request.setTenantId(tenantId);
         GetTenantInfoResponse response = getTenantInfo().handleGetTenantInfo(request);
 
-        if ("200".equals(response.getResultCode())) {
+        if (TenantConstants.REQUEST_STATUS_SUCCESS.equals(response.getResultCode())) {
             TenantInfo tenantInfo = response.getTenantInfo();
             if (tenantInfo == null) {
                 throw new TenantException("没找到企业信息！原因：" + response.getResultMessage());
@@ -180,7 +181,7 @@ public final class TenantHandler {
         request.setTenantCode(tenantCode);
         GetTenantsInfoResponse response = getTenantInfo().handleGetTenantsInfo(request);
 
-        if ("200".equals(response.getResultCode())) {
+        if (TenantConstants.REQUEST_STATUS_SUCCESS.equals(response.getResultCode())) {
             List<TenantInfo> mbsTenantBeanList = response.getTenantInfoList();
             if (mbsTenantBeanList == null || mbsTenantBeanList.isEmpty()) {
                 throw new TenantException("没找到企业[" + tenantCode + "]信息！");
@@ -206,7 +207,7 @@ public final class TenantHandler {
         request.setTenantCode(tenantCode);
         GetTenantInfoResponse response = getTenantInfo().handleGetTenantByCode(request);
 
-        if ("200".equals(response.getResultCode())) {
+        if (TenantConstants.REQUEST_STATUS_SUCCESS.equals(response.getResultCode())) {
             TenantInfo mbsTenantBeanList = response.getTenantInfo();
             if (mbsTenantBeanList == null) {
                 throw new TenantException("没找到企业[" + tenantCode + "]信息！");
@@ -225,7 +226,7 @@ public final class TenantHandler {
      */
     public static List<String> getAllTenantIds() {
         GetAllTenantIdResponse response = getTenantInfo().handleGetAllTenantId();
-        if ("200".equals(response.getResultCode())) {
+        if (TenantConstants.REQUEST_STATUS_SUCCESS.equals(response.getResultCode())) {
             return response.getTenantIds();
         } else {
             throw new TenantException(response.getResultMessage());

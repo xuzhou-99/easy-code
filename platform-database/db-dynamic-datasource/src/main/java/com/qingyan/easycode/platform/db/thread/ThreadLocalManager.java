@@ -23,14 +23,8 @@ public class ThreadLocalManager {
      */
     private static final ThreadLocal<HttpServletResponse> RESPONSE_LOCAL = new ThreadLocal<>();
 
+    private ThreadLocalManager() {
 
-    /**
-     * set HttpServletRequest
-     *
-     * @param request HttpServletRequest
-     */
-    public static void setHttpServletRequest(HttpServletRequest request) {
-        REQUEST_LOCAL.set(request);
     }
 
     /**
@@ -42,16 +36,14 @@ public class ThreadLocalManager {
         return REQUEST_LOCAL.get();
     }
 
-
     /**
-     * set httpServletResponse
+     * set HttpServletRequest
      *
-     * @param response HttpServletResponse
+     * @param request HttpServletRequest
      */
-    public static void setHttpServletResponse(HttpServletResponse response) {
-        RESPONSE_LOCAL.set(response);
+    public static void setHttpServletRequest(HttpServletRequest request) {
+        REQUEST_LOCAL.set(request);
     }
-
 
     /**
      * get httpServletResponse
@@ -60,6 +52,15 @@ public class ThreadLocalManager {
      */
     public static HttpServletResponse getHttpServletResponse() {
         return RESPONSE_LOCAL.get();
+    }
+
+    /**
+     * set httpServletResponse
+     *
+     * @param response HttpServletResponse
+     */
+    public static void setHttpServletResponse(HttpServletResponse response) {
+        RESPONSE_LOCAL.set(response);
     }
 
     /**
