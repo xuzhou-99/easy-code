@@ -5,8 +5,8 @@ import lombok.Data;
 /**
  * 日志管理的查询参数
  *
- * @author fengshuonan
- * @date 2020/10/28 11:26
+ * @author xuzhou
+ * @since 2022/2/10 16:17
  */
 @Data
 public class LogManagerRequest {

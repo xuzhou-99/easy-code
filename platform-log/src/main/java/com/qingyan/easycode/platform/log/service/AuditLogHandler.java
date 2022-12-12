@@ -23,16 +23,17 @@ import com.qingyan.easycode.platform.log.enums.LogExceptionEnum;
 import com.qingyan.easycode.platform.log.mapper.AuditLogMapper;
 import com.qingyan.easycode.platform.log.web.vo.request.LogManagerRequest;
 
-import cn.altaria.audit.handler.IAuditLogHandler;
+import cn.altaria.audit.handler.AbstractAuditLogHandler;
 import cn.altaria.audit.pojo.AuditLogRecord;
 import cn.altaria.base.util.RequestUtils;
 
 /**
  * @author xuzhou
+ * @version v1.0.0
  * @since 2022/11/15
  */
 @Service
-public class AuditLogHandler implements IAuditLogHandler {
+public class AuditLogHandler extends AbstractAuditLogHandler {
 
     @Resource
     private AuditLogMapper auditLogMapper;

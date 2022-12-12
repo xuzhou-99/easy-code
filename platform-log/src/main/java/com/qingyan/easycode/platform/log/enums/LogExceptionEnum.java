@@ -30,6 +30,7 @@ import lombok.Getter;
  * 日志异常枚举
  *
  * @author xuzhou
+ * @version v1.0.0
  * @since 2022-12-05
  */
 @Getter

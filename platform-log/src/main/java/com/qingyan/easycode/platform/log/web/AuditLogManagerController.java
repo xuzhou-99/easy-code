@@ -50,7 +50,7 @@ import cn.altaria.base.response.ApiResponse;
  *
  * @author xuzhou
  * @version v1.0.0
- * @date 2020/11/3 12:44
+ * @since  2022/2/10 16:17
  */
 @RestController
 @RequestMapping(name = "日志管理控制器")
