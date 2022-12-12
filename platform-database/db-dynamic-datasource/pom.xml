@@ -5,7 +5,7 @@
     <parent>
         <artifactId>platform-database</artifactId>
         <groupId>com.qingyan</groupId>
-        <version>1.0-SNAPSHOT</version>
+        <version>0.0.1</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
     <modelVersion>4.0.0</modelVersion>
@@ -22,7 +22,7 @@
         <dependency>
             <groupId>com.qingyan</groupId>
             <artifactId>platform-tenant</artifactId>
-            <version>1.0-SNAPSHOT</version>
+            <version>0.0.1</version>
         </dependency>
 
 
@@ -41,7 +41,7 @@
         <dependency>
             <groupId>com.qingyan</groupId>
             <artifactId>platform-core</artifactId>
-            <version>1.0-SNAPSHOT</version>
+            <version>0.0.1</version>
             <scope>compile</scope>
         </dependency>
     </dependencies>

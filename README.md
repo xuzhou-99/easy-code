@@ -13,7 +13,7 @@
 <dependency>
     <groupId>com.qingyan</groupId>
     <artifactId>platform-core</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <version>0.0.1</version>
 </dependency>
 ```
 
@@ -28,6 +28,6 @@
 <dependency>
     <groupId>com.qingyan</groupId>
     <artifactId>platform-log</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <version>0.0.1</version>
 </dependency>
 ```
