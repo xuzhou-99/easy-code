@@ -20,7 +20,7 @@ import com.qingyan.easycode.platform.tenant.exception.TenantException;
 import com.qingyan.easycode.platform.tenant.redis.RedisUtil;
 import com.qingyan.easycode.platform.tenant.service.IGetTenantInfo;
 
-import cn.altaria.base.util.SpringBeanUtils;
+import cn.altaria.base.spring.SpringBeanUtils;
 
 
 /**

@@ -1,4 +1,4 @@
-package com.qingyan.easycode.platform.tenant.service;
+package com.qingyan.easycode.platform.tenant.service.impl;
 
 import java.util.Collections;
 import java.util.List;
@@ -22,6 +22,7 @@ import com.qingyan.easycode.platform.tenant.mapper.TenantDataBaseMapper;
 import com.qingyan.easycode.platform.tenant.mapper.TenantMapper;
 import com.qingyan.easycode.platform.tenant.pojo.SysDatabaseInfo;
 import com.qingyan.easycode.platform.tenant.pojo.SysTenant;
+import com.qingyan.easycode.platform.tenant.service.IGetTenantInfo;
 
 /**
  * @author xuzhou

@@ -6,7 +6,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import com.qingyan.easycode.platform.tenant.redis.RedisUtil;
-import com.qingyan.easycode.platform.tenant.service.GetTenantInfoImpl;
+import com.qingyan.easycode.platform.tenant.service.impl.GetTenantInfoImpl;
 import com.qingyan.easycode.platform.tenant.service.IGetTenantInfo;
 
 /**
